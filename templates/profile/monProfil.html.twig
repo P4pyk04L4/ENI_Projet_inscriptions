@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="col-lg-4 col-md-6 col-sm-8 position-absolute top-50 start-50 translate-middle">
+    <h1>{{ app.user.pseudo }}</h1>
+
+    <table class="table">
+        <tr>
+            <td>Prénom</td>
+            <td>{{ app.user.prenom }}</td>
+        </tr>
+        <tr>
+            <td>Nom :</td>
+            <td>{{ app.user.nom }}</td>
+        </tr>
+        <tr>
+            <td>Téléphone</td>
+            <td>{% if app.user.telephone %}{{ app.user.telephone }}{% endif %}</td>
+        </tr>
+        <tr>
+            <td>Email</td>
+            <td>{{ app.user.email }}</td>
+        </tr>
+        <tr>
+            <td>Campus</td>
+            <td>{{ app.user.campus.nom }}</td>
+        </tr>
+    </table>
+</div>
+{% endblock %}
+
+{% block title %}
+Mon profil
+{% endblock %}
+
