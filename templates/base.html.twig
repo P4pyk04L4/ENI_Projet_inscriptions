@@ -14,16 +14,20 @@
     <body>
 
         <header style="height: auto;">
-            <div class="mx-4 px-4 p-2 my-4 text-white" id="titrePortail">
-                <div>
+            <div class="d-flex align-items-center justify-content-between mx-4 px-4 p-2 my-4 text-white" id="titrePortail">
+                <div class="ms-4">
                     <a href="#" class="lien-personnalise"><h1>Sortir.com</h1></a>
                 </div>
 
+                <div class="d-flex align-items-end">
+                    {% if app.user %}
+                        {% include 'inc/nav.html.twig' %}
+                    {% endif %}
+                </div>
             </div>
-            {#            {% include 'inc/nav.html.twig' %}#}
         </header>
 
-        <div class="container">
+        <div class="container my-3">
             {% block body %}{% endblock %}
         </div>
     </body>
