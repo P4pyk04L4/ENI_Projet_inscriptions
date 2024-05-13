@@ -12,6 +12,19 @@
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+
+        <header style="height: auto;">
+            <div class="mx-4 px-4 p-2 my-4 text-white" id="titrePortail">
+                <div>
+                    <a href="#" class="lien-personnalise"><h1>Sortir.com</h1></a>
+                </div>
+
+            </div>
+            {#            {% include 'inc/nav.html.twig' %}#}
+        </header>
+
+        <div class="container">
+            {% block body %}{% endblock %}
+        </div>
     </body>
 </html>
