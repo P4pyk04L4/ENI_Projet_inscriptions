@@ -40,4 +40,9 @@ class SortieRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function findAllSorties()
+    {
+
+    }
 }

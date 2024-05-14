@@ -27,8 +27,20 @@
             </div>
         </header>
 
-        <div class="container my-3">
+        <div class="corps container my-3">
+            {# read and display all flash messages #}
+            {% for label, messages in app.flashes %}
+
+                {% for message in messages %}
+                    <div class=" alert alert-{{ label }} flash-{{ label }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+            {% endfor %}
             {% block body %}{% endblock %}
         </div>
+        {% include 'inc/footer.html.twig' %}
+        {% block scripts %}{% endblock %}
     </body>
 </html>
