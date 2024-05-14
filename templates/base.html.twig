@@ -12,6 +12,35 @@
         {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+
+        <header style="height: auto;">
+            <div class="d-flex align-items-center justify-content-between mx-4 px-4 p-2 my-4 text-white" id="titrePortail">
+                <div class="ms-4">
+                    <a href="#" class="lien-personnalise"><h1>Sortir.com</h1></a>
+                </div>
+
+                <div class="d-flex align-items-end">
+                    {% if app.user %}
+                        {% include 'inc/nav.html.twig' %}
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <div class="corps container my-3">
+            {# read and display all flash messages #}
+            {% for label, messages in app.flashes %}
+
+                {% for message in messages %}
+                    <div class=" alert alert-{{ label }} flash-{{ label }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+            {% endfor %}
+            {% block body %}{% endblock %}
+        </div>
+        {% include 'inc/footer.html.twig' %}
+        {% block scripts %}{% endblock %}
     </body>
 </html>

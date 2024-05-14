@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="corps container-fluid h-100">
+        <div class="row h-100 align-items-center justify-content-center">
+            <div class="col-lg-4 col-md-6 col-sm-8">
+                <div class="d-flex justify-content-center py-3">
+                    <h1>{{ app.user.pseudo }}</h1>
+                </div>
+
+                {{ form_start(participant) }}
+                {{ form_widget(participant) }}
+                <div class="d-flex justify-content-end">
+                <button role="button"
+                        href="{{ path('profils_monProfil') }}"
+                        class="btn btn-secondary mx-2"
+                        id="bouton-annuler">Annuler</button>
+                <button type="submit"
+                        class="btn btn-success">Valider</button>
+                </div>
+                {{ form_end(participant) }}
+
+            </div>
+        </div>
+    </div> {% endblock %}
+{% block title %}
+    Mon profil - Modifier
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        let boutonAnnuler = document.querySelector("#bouton-annuler");
+        boutonAnnuler.addEventListener('click', function(e){
+            e.preventDefault();
+            window.location.href = this.getAttribute('href');
+        })
+    </script>
+{% endblock %}

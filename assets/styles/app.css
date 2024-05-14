@@ -1,3 +1,33 @@
 body {
-    background-color: skyblue;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.corps.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+a.lien-personnalise {
+    all:unset;
+    cursor: pointer;
+}
+
+.row {
+    flex: 1;
+}
+
+.card {
+    width: 18rem;
+}
+
+header {
+    background: linear-gradient(45deg, #150579, #02002A);
+}
+
+footer {
+    background: linear-gradient(45deg, #02002A, #150579);
 }

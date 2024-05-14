@@ -6,11 +6,14 @@ use App\Repository\ParticipantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: ParticipantRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[UniqueEntity(fields: ['pseudo'], message: 'There is already an account with this pseudo')]
 class Participant implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -18,20 +21,14 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
-
-    /**
-     * @var list<string> The user roles
-     */
-    #[ORM\Column]
-    private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
-    private ?string $password = null;
+    private ?string $motPasse = null;
 
     #[ORM\Column(length: 100)]
     private ?string $nom = null;
@@ -56,7 +53,7 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
      * @var Collection<int, Sortie>
      */
     #[ORM\OneToMany(targetEntity: Sortie::class, mappedBy: 'organisateur')]
-    private Collection $organisateur;
+    private Collection $sortiesOrganisees;
 
     /**
      * @var Collection<int, Sortie>
@@ -64,9 +61,12 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Sortie::class, inversedBy: 'participants')]
     private Collection $sorties;
 
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $pseudo = null;
+
     public function __construct()
     {
-        $this->organisateur = new ArrayCollection();
+        $this->sortiesOrganisees = new ArrayCollection();
         $this->sorties = new ArrayCollection();
     }
 
@@ -103,34 +103,25 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        return $this->administrateur ? ['ROLE_ADMIN'] : ['ROLE_USER'];
     }
 
-    /**
-     * @param list<string> $roles
-     */
-    public function setRoles(array $roles): static
+    public function getMotPasse(): string
     {
-        $this->roles = $roles;
-
-        return $this;
+        return $this->motPasse;
     }
 
     /**
-     * @see PasswordAuthenticatedUserInterface
-     */
+    * @see PasswordAuthenticatedUserInterface
+    */
     public function getPassword(): string
     {
-        return $this->password;
+        return $this->motPasse;
     }
 
-    public function setPassword(string $password): static
+    public function setMotPasse(string $motPasse): static
     {
-        $this->password = $password;
+        $this->motPasse = $motPasse;
 
         return $this;
     }
@@ -219,27 +210,27 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<int, Sortie>
      */
-    public function getOrganisateur(): Collection
+    public function getSortiesOrganisees(): Collection
     {
-        return $this->organisateur;
+        return $this->sortiesOrganisees;
     }
 
-    public function addOrganisateur(Sortie $organisateur): static
+    public function addSortiesOrganisees(Sortie $sortie): static
     {
-        if (!$this->organisateur->contains($organisateur)) {
-            $this->organisateur->add($organisateur);
-            $organisateur->setOrganisateur($this);
+        if (!$this->sortiesOrganisees->contains($sortie)) {
+            $this->sortiesOrganisees->add($sortie);
+            $sortie->setOrganisateur($this);
         }
 
         return $this;
     }
 
-    public function removeOrganisateur(Sortie $organisateur): static
+    public function removeSortiesOrganisees(Sortie $sortie): static
     {
-        if ($this->organisateur->removeElement($organisateur)) {
+        if ($this->sortiesOrganisees->removeElement($sortie)) {
             // set the owning side to null (unless already changed)
-            if ($organisateur->getOrganisateur() === $this) {
-                $organisateur->setOrganisateur(null);
+            if ($sortie->getOrganisateur() === $this) {
+                $sortie->setOrganisateur(null);
             }
         }
 
@@ -254,18 +245,30 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->sorties;
     }
 
-    public function addSorty(Sortie $sorty): static
+    public function addSortie(Sortie $sortie): static
     {
-        if (!$this->sorties->contains($sorty)) {
-            $this->sorties->add($sorty);
+        if (!$this->sorties->contains($sortie)) {
+            $this->sorties->add($sortie);
         }
 
         return $this;
     }
 
-    public function removeSorty(Sortie $sorty): static
+    public function removeSortie(Sortie $sortie): static
     {
-        $this->sorties->removeElement($sorty);
+        $this->sorties->removeElement($sortie);
+
+        return $this;
+    }
+
+    public function getPseudo(): ?string
+    {
+        return $this->pseudo;
+    }
+
+    public function setPseudo(string $pseudo): static
+    {
+        $this->pseudo = $pseudo;
 
         return $this;
     }

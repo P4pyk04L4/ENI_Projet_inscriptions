@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="corps container-fluid h-100">
+        <div class="row h-100 align-items-center justify-content-center">
+            <div class="col-lg-4 col-md-6 col-sm-8">
+                <div class="d-flex justify-content-center py-3">
+                    <h1>{{ app.user.pseudo }}</h1>
+                </div>
+                <table class="table py-3">
+                    <tr>
+                        <td>Prénom</td>
+                        <td>{{ app.user.prenom }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nom :</td>
+                        <td>{{ app.user.nom }}</td>
+                    </tr>
+                    <tr>
+                        <td>Téléphone</td>
+                        <td>{% if app.user.telephone %}{{ app.user.telephone }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>{{ app.user.email }}</td>
+                    </tr>
+                    <tr>
+                        <td>Campus</td>
+                        <td>{{ app.user.campus.nom }}</td>
+                    </tr>
+                </table>
+                <div class="d-flex justify-content-center py-3">
+                    <a href="{{ path('profils_monProfil_modifier') }}">
+                        <button class="btn btn-secondary">Modifier le profil</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div> {% endblock %}
+{% block title %}
+    Mon profil
+{% endblock %}
