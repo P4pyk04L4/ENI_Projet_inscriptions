@@ -3,7 +3,6 @@
 namespace App\Classe;
 
 use App\Entity\Campus;
-use phpDocumentor\Reflection\Types\Boolean;
 
 class Filtre
 {

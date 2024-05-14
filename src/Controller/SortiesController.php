@@ -23,8 +23,26 @@ class SortiesController extends AbstractController
         $filtreForm->handleRequest($request);
 
         if($filtreForm->isSubmitted() && $filtreForm->isValid()){
-            $filtreRecherche = $filtreForm->getData();
-            dump($filtreRecherche);
+
+            $campus = $filtreForm->get('campus')->getData();
+            $nomSortie = $filtreForm->get('nomSortie')->getData();
+            $dateDebut = $filtreForm->get('dateDebut')->getData();
+            $dateFin = $filtreForm->get('dateFin')->getData();
+            $estOrganisateur = $filtreForm->get('estOrganisateur')->getData();
+            $estInscrit = $filtreForm->get('estInscrit')->getData();
+            $nEstPasInscrit = $filtreForm->get('nEstPasInscrit')->getData();
+            $sortiesPassees = $filtreForm->get('sortiesPassees')->getData();
+
+            $user = $this->getUser();
+
+            $resultats = $sortieRepository->afficherSortiesFiltrees($user, $campus, $nomSortie, $dateDebut, $dateFin, $estOrganisateur, $estInscrit, $nEstPasInscrit, $sortiesPassees);
+            dump($resultats);
+
+            return $this->render('sorties/index.html.twig', [
+                'controller_name' => 'SortiesController',
+                'sorties' => $resultats,
+                'filtreForm' =>$filtreForm->createView()
+            ]);
         }
 
         return $this->render('sorties/index.html.twig', [
