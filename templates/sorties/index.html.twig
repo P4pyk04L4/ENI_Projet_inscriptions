@@ -1,14 +1,76 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello SortiesController!{% endblock %}
+{% block title %}Liste des sorties{% endblock %}
 
 {% block body %}
 
-    <div class="bg-body-secondary mb-3" style="height: 100px">
-        ESPACE POUR LES FILTRES
+{# FORMULAIRE POUR LES FILTRES #}
+
+    <div class="bg-body-secondary mb-3 p-3">
+        <div class="container">
+            <div class="row">
+
+                {{ form_start(filtreForm, {'attr': {'class': 'p-0 m-0 row'}}) }}
+                <div class="col-5">
+                    <div class="group row mb-3">
+                        <div class="col">
+                            {{ form_label(filtreForm.campus) }}
+                        </div>
+                        <div class="col">
+                            {{ form_widget(filtreForm.campus) }}
+                        </div>
+                    </div>
+                    <div class="group row mb-3">
+                        <div class="col">
+                            {{ form_label(filtreForm.nomSortie) }}
+                        </div>
+                        <div class="col">
+                            {{ form_widget(filtreForm.nomSortie) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="group row">
+                                <div class="col">
+                                    Entre
+                                </div>
+                                <div class="col">
+                                    {{ form_widget(filtreForm.dateDebut) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="group row">
+                                <div class="col">
+                                    et
+                                </div>
+                                <div class="col">
+                                    {{ form_widget(filtreForm.dateFin) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5">
+                    {{ form_row(filtreForm.estOrganisateur) }}
+                    {{ form_row(filtreForm.estInscrit) }}
+                    {{ form_row(filtreForm.nEstPasInscrit) }}
+                    {{ form_row(filtreForm.sortiesPassees) }}
+                </div>
+                <div class="col-2">
+                    <button type="submit" class="btn btn-secondary">Rechercher</button>
+                    {{ form_end(filtreForm) }}
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
 
+{# TABLEAU DE RESULTATS #}
+
+    <div style="max-height: 500px; overflow: auto">
 
     <table class="table table-striped">
         <thead>
@@ -36,5 +98,12 @@
         {% endfor %}
         </tbody>
     </table>
+
+    </div>
+    <div>
+
+        <a href="{{ path('sortie_nouvelle') }}"><button class="btn btn-success">Créer une sortie</button></a>
+    </div>
+
 
 {% endblock %}

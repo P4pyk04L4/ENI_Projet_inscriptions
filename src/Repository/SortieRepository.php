@@ -2,6 +2,9 @@
 
 namespace App\Repository;
 
+use App\Classe\Filtre;
+use App\Entity\Campus;
+use App\Entity\Participant;
 use App\Entity\Sortie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -43,6 +46,55 @@ class SortieRepository extends ServiceEntityRepository
 
     public function findAllSorties()
     {
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->leftJoin('s.organisateur', 'org')->addSelect('org');
+        $queryBuilder->leftJoin('s.participants', 'part')->addSelect('part');
+        $queryBuilder->leftJoin('s.lieu', 'li')->addSelect('li');
+        $queryBuilder->leftJoin('s.siteOrganisateur', 'campus')->addSelect('campus');
+        $queryBuilder->leftJoin('s.etat', 'e')->addSelect('e');
 
+        $query = $queryBuilder->getQuery();
+        return $query->getResult();
+    }
+
+    public function afficherSortiesFiltrees(?Participant $user, Filtre $filtre)
+    {
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->leftJoin('s.organisateur', 'org')->addSelect('org');
+        $queryBuilder->leftJoin('s.participants', 'part')->addSelect('part');
+        $queryBuilder->leftJoin('s.lieu', 'li')->addSelect('li');
+        $queryBuilder->leftJoin('s.siteOrganisateur', 'campus')->addSelect('campus');
+        $queryBuilder->leftJoin('s.etat', 'e')->addSelect('e');
+
+        if($filtre->getCampus()){
+            $queryBuilder->andWhere('s.siteOrganisateur = :campus')
+                ->setParameter('campus', $filtre->getCampus());
+        }
+        if($filtre->getNomSortie()){
+            $queryBuilder->andWhere('s.nom LIKE :nomSortie' )
+                ->setParameter('nomSortie', '%' . $filtre->getNomSortie() . '%');
+        }
+        if($filtre->getDateDebut()){
+            $queryBuilder->andWhere('s.dateHeureDebut > :dateDebut')->setParameter('dateDebut', $filtre->getDateDebut());
+        }
+        if($filtre->getDateFin()){
+            $queryBuilder->andWhere('s.dateHeureDebut < :dateFin')->setParameter('dateFin', $filtre->getDateFin());
+        }
+        if($filtre->getEstOrganisateur()){
+            $queryBuilder->andWhere('s.organisateur = :organisateur')->setParameter('organisateur', $user);
+        }
+        if($filtre->getEstInscrit() && !$filtre->getNEstPasInscrit()){
+            $queryBuilder->andWhere(':participant MEMBER OF s.participants')->setParameter('participant', $user);
+        }
+        if($filtre->getNEstPasInscrit() && !$filtre->getEstInscrit()){
+            $queryBuilder->andWhere(':participant NOT MEMBER OF s.participants')->setParameter('participant', $user);
+        }
+        if($filtre->getSortiesPassees()){
+            $now = new \DateTime("now");
+            $queryBuilder->andWhere('s.dateHeureDebut + (s.duree * 60) < :now')->setParameter('now', $now);
+        }
+
+        $query = $queryBuilder->getQuery();
+        return $query->getResult();
     }
 }
