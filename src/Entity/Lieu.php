@@ -41,6 +41,8 @@ class Lieu
 
     #[ORM\ManyToOne(inversedBy: 'lieux')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['listeLieux'])]
+
     private ?Ville $ville = null;
 
     public function __construct()

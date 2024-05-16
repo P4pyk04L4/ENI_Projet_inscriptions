@@ -118,6 +118,22 @@
                         <p id="lieuCodePostal"></p>
                     </div>
                 </div>
+                <div class="group row mb-3">
+                    <div class="col">
+                        <p>Longitude :</p>
+                    </div>
+                    <div class="col">
+                        <p id="lieuLongitude"></p>
+                    </div>
+                </div>
+                <div class="group row mb-3">
+                    <div class="col">
+                        <p>Latitude :</p>
+                    </div>
+                    <div class="col">
+                        <p id="lieuLatitude"></p>
+                    </div>
+                </div>
             </div>
             {{ form_end(sortieForm) }}
 
@@ -142,6 +158,8 @@
         let choixVille = document.querySelector('#sortie_ville')
         let lieuRue = document.querySelector('#lieuRue');
         let lieuCodePostal = document.querySelector('#lieuCodePostal');
+        let lieuLongitude = document.querySelector('#lieuLongitude');
+        let lieuLatitude = document.querySelector('#lieuLatitude');
 
         let jsonArray;
 
@@ -198,6 +216,9 @@
                 }
             }
             lieuRue.innerText = lieuSelectionne.rue;
+            lieuCodePostal.innerText = lieuSelectionne.ville.codePostal;
+            lieuLongitude.innerText = lieuSelectionne.longitude;
+            lieuLatitude.innerText = lieuSelectionne.latitude;
         })
     </script>
 {% endblock %}
