@@ -6,11 +6,8 @@ use App\Entity\Campus;
 use App\Entity\Lieu;
 use App\Entity\Sortie;
 use App\Entity\Ville;
-use App\Repository\LieuRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Event\PreSetDataEvent;
-use Symfony\Component\Form\Event\PreSubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -19,16 +16,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 
 class SortieType extends AbstractType
 {
-    private LieuRepository $lieuRepository;
-
-    public function __construct(LieuRepository $lieuRepository){
-        $this->lieuRepository = $lieuRepository;
-    }
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -75,8 +67,7 @@ class SortieType extends AbstractType
                 'class' => Lieu::class,
                 'choice_label' => 'nom',
                 'placeholder' => 'Choisissez un lieu',
-                //'disabled' => true,
-                'mapped' => true
+                'choices' => []
             ])
             ->add('btnEnregistrer', SubmitType::class, [
                 'label' => 'Enregistrer',
@@ -85,7 +76,35 @@ class SortieType extends AbstractType
             ->add('btnPublier', SubmitType::class, [
                 'label' => 'Publier la sortie',
                 'attr' => ['class' => 'btn btn-secondary']
-            ])
+            ]);
+
+            $formModifier = function(FormInterface $form, ?Ville $ville = null):void
+            {
+                $lieux = null === $ville ? [] : $ville->getLieux();
+                $form->add('lieu', EntityType::class, [
+                    'class' => Lieu::class,
+                    'placeholder' => '',
+                    'choices' => $lieux
+                ]);
+            };
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) use ($formModifier): void {
+            $data = $event->getData();
+            $lieux = $data->getLieu();
+
+            if ($data instanceof Sortie && $lieux) {
+                $ville = $lieux->getVille();
+                $formModifier($event->getForm(), $ville);
+            }
+        });
+
+        $builder->get('ville')->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) use ($formModifier): void {
+            $ville = $event->getForm()->getData();
+
+            $formModifier($event->getForm()->getParent(), $ville);
+        });
+
+        $builder->setAction($options['action']);
 
 //            ->add('lieuType', LieuType::class, [
 //                'mapped' => false,
