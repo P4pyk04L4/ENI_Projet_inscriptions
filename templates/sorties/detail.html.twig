@@ -1,0 +1,173 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ sortie.nom }} - Détail
+{% endblock %}
+
+{% block body %}
+    <div class="corps container h-100">
+        <div class="row h-100 align-items-center justify-content-center">
+            <div class="col-lg-10 col-md-11 col-sm-12">
+                <div>
+                    {# BOUTON D'INSCRIPTION ET DE DESINSCRIPTION A UNE SORTIE #}
+                    {% if sortie.etat.libelle == 'Ouverte' %}
+                        <a href="{{ path('sortie_inscription_sortie', {'id' : sortie.id })}}" class="inscription-button">
+                            {% if app.user not in sortie.participants %}
+                                <button class="btn btn-success btn-sm">S'inscrire</button>
+                            {% else %}
+                                <button class="btn btn-danger btn-sm">Se désister</button>
+                            {%  endif %}
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-center py-3 m-3">
+                    <h1>Afficher une sortie</h1>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Nom de la sortie :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.nom }}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Date et heure de la sortie :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.dateHeureDebut|date('d/m/Y H:m') }}<p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Date limite d'inscription :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.dateLimiteInscription|date('d/m/Y') }}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Nombre de places :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.nbInscriptionsMax }}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Durée :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.duree }} minute{% if sortie.duree > 0 %}s{% endif %}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Description et infos :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.infosSortie }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Campus :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.siteOrganisateur.nom }}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Ville :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.lieu.ville.nom }}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Lieu :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.lieu }}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Rue :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.lieu.rue }}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Code postal :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.lieu.ville.codePostal }}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Latitude :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.lieu.latitude }}</p>
+                            </div>
+                        </div>
+                        <div class="group row mb-3">
+                            <div class="col">
+                                <p>Longitude :</p>
+                            </div>
+                            <div class="col">
+                                <p>{{ sortie.lieu.longitude }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        {% if sortie.participants|length > 0 %}
+                        <h3>Liste des participants inscrits :</h3>
+                        <table class="table">
+                            <thead>
+                                <th>Pseudo</th>
+                                <th>Nom</th>
+                                <th>Afficher le profil</th>
+                            </thead>
+                            <tbody>
+                                {% for participant in sortie.participants %}
+                                    <tr>
+                                        <td>{{ participant.pseudo }}</td>
+                                        <td>{{ participant.pseudo }}</td>
+                                        <td>
+                                            <a href="{{ path('profils_afficher_participant', {'id' : participant.id }) }}">
+                                                <button class="btn btn-sm btn-secondary">Voir le profil</button>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                            {% else %}
+                            <p>Il n'y a aucun participant à cet événement.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+    </div>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

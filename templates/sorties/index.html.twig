@@ -92,8 +92,21 @@
                 <td>{{ sortie.participants.count }}/{{ sortie.nbInscriptionsMax }}</td>
                 <td>{{ sortie.etat.libelle }}</td>
                 <td>........</td>
-                <td>{{ sortie.organisateur.prenom }} {{ sortie.organisateur.nom|first }}.</td>
-                <td>........</td>
+                <td><a href="{{ path('profils_afficher_participant', {'id' : sortie.organisateur.id }) }}">{{ sortie.organisateur.prenom }} {{ sortie.organisateur.nom|first }}.</a></td>
+                <td>
+                    <a href="{{ path('sortie_detail', {'id': sortie.id}) }}"><button class="btn btn-secondary btn-sm">Afficher</button></a>
+                    {# BOUTON D'INSCRIPTION ET DE DESINSCRIPTION A UNE SORTIE #}
+                    {% if sortie.etat.libelle == 'Ouverte' %}
+                    <a href="{{ path('sortie_inscription_sortie', {'id' : sortie.id })}}" class="inscription-button">
+                        {% if app.user not in sortie.participants %}
+                            <button class="btn btn-success btn-sm">S'inscrire</button>
+                        {% else %}
+                            <button class="btn btn-danger btn-sm">Se désister</button>
+                        {%  endif %}
+                    </a>
+                    {% endif %}
+
+                </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -106,4 +119,29 @@
     </div>
 
 
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // let inscriptionButtons = document.querySelectorAll('.inscription-button');
+        // inscriptionButtons.forEach(inscriptionButton => {
+        //     inscriptionButton.addEventListener('click', function(e){
+        //         e.preventDefault();
+        //         let urlInscriptionButton = this.getAttribute('href');
+        //         console.log(urlInscriptionButton);
+        //
+        //         fetch(urlInscriptionButton, {
+        //             method : 'GET',
+        //             headers : {
+        //                 'Content-Type': 'applicaion/json'
+        //             }
+        //         })
+        //             .then(function(response) {
+        //                 const responseData = response;
+        //                 console.log(response.json())
+        //             })
+        //             .catch(error => console.log(error.message))
+        //     })
+        // })
+    </script>
 {% endblock %}

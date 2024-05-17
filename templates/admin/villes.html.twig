@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Admin - Gestion des villes
+{% endblock %}
+
+{% block body %}
+    <div class="corps container h-100">
+        <div class="row h-100 align-items-center justify-content-center">
+            <div class="col-lg-10 col-md-11 col-sm-12">
+                <div class="d-flex justify-content-center py-3">
+                    <h1>Gérer les villes</h1>
+                </div>
+
+                <div class="bg-body-secondary mb-3 p-3">
+                    <div class="container">
+                        <div class="row">
+                            {{ form_start(filtreVilleForm, {'attr': {'class': 'p-0 m-0 row'}}) }}
+
+                            <div class="group row col-9 ">
+                                <div class="col-3 d-flex align-items-center">
+                                    {{ form_label(filtreVilleForm.nomVille) }}
+                                </div>
+                                <div class="col-9">
+                                    {{ form_widget(filtreVilleForm.nomVille) }}
+                                    {{ form_errors(filtreVilleForm.nomVille) }}
+                                </div>
+                            </div>
+
+                            <div class="col-3 row">
+                                <div class="col">
+                                    {{ form_widget(filtreVilleForm.searchButton) }}
+                                </div>
+                                <div class="col">
+                                    {{ form_widget(filtreVilleForm.resetButton) }}
+                                </div>
+                                {{ form_end(filtreVilleForm) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                {# TABLEAU DES CAMPUS #}
+                <table class="table table-light">
+                    <thead>
+                    <th>Ville</th>
+                    <th>Code postal</th>
+                    <th>Actions</th>
+                    </thead>
+                    <tbody>
+                    {% for ville in villes %}
+                        <tr>
+                            <td>{{ ville.nom }}</td>
+                            <td>{{ ville.codePostal }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary">
+                                    Modifier
+                                </button>
+                                <button class="btn btn-sm btn-danger">
+                                    Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td>
+                            {{ form_start(villeForm) }}
+                            {{ form_widget(villeForm.nom) }}
+                            {{ form_errors(villeForm.nom) }}
+                        </td>
+                        <td>
+                            {{ form_widget(villeForm.codePostal) }}
+                            {{ form_errors(villeForm.codePostal) }}
+                        </td>
+                        <td>
+                            {{ form_row(villeForm.addButton) }}
+                            {{ form_end(villeForm) }}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}
+

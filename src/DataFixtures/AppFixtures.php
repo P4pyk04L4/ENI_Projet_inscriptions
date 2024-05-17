@@ -95,7 +95,9 @@ class AppFixtures extends Fixture
             $lieu = new Lieu();
             $lieu->setNom($lieuxRandom[$i])
                 ->setVille($tableauVilles[$randomIndex])
-                ->setRue($faker->streetName());
+                ->setRue($faker->streetName())
+                ->setLongitude($faker->longitude())
+                ->setLatitude($faker->latitude());
             $tableauLieux[] = $lieu;
 
             $manager->persist($lieu);

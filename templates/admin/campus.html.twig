@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    Admin - Gestion des campus
+{% endblock %}
+
+{% block body %}
+<div class="corps container h-100">
+    <div class="row h-100 align-items-center justify-content-center">
+        <div class="col-lg-10 col-md-11 col-sm-12">
+            <div class="d-flex justify-content-center py-3">
+                <h1>Gérer les campus</h1>
+            </div>
+
+            <div class="bg-body-secondary mb-3 p-3">
+                <div class="container">
+                    <div class="row">
+                        {{ form_start(filtreCampus, {'attr': {'class': 'p-0 m-0 row'}}) }}
+
+                        <div class="group row col-9 ">
+                            <div class="col-3 d-flex align-items-center">
+                                {{ form_label(filtreCampus.nomCampus) }}
+                            </div>
+                            <div class="col-9">
+                                {{ form_widget(filtreCampus.nomCampus) }}
+                                {{ form_errors(filtreCampus.nomCampus) }}
+                            </div>
+                        </div>
+
+                        <div class="col-3 row">
+                            <div class="col">
+                                {{ form_widget(filtreCampus.searchButton) }}
+                            </div>
+                            <div class="col">
+                                {{ form_widget(filtreCampus.resetButton) }}
+                            </div>
+                            {{ form_end(filtreCampus) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            {# TABLEAU DES CAMPUS #}
+            <table class="table table-light">
+                <thead>
+                    <th>Campus</th>
+                    <th>Actions</th>
+                </thead>
+                <tbody>
+                    {% for lieu in campus %}
+                        <tr>
+                            <td>{{ lieu.nom }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary">
+                                    Modifier
+                                </button>
+                                <button class="btn btn-sm btn-danger">
+                                    Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                <tr>
+                    <td>
+                    {{ form_start(campusForm) }}
+                        {{ form_widget(campusForm.nom) }}
+                        {{ form_errors(campusForm.nom) }}
+                    </td>
+                    <td>
+                        {{ form_row(campusForm.submit) }}
+                        {{ form_end(campusForm) }}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

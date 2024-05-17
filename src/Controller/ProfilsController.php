@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Participant;
 use App\Form\ParticipantType;
 use App\Repository\ParticipantRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,12 +23,12 @@ class ProfilsController extends AbstractController
     #[Route('/monprofil/modifier', name: 'monProfil_modifier')]
     public function modifier(ParticipantRepository $participantRepository, Request $request, EntityManagerInterface $entityManager): Response
     {
-        $participant = $participantRepository->find($this->getUser());
+        /** @var Participant $participant */
+        $participant = $this->getUser();
         $participantForm = $this->createForm(ParticipantType::class, $participant);
         $participantForm->handleRequest($request);
 
         if($participantForm->isSubmitted() && $participantForm->isValid()){
-            $participantBdd = $participantForm->getData();
             $entityManager->flush();
 
             $this->addFlash(
@@ -39,6 +40,14 @@ class ProfilsController extends AbstractController
 
         return $this->render('profile/modifier.html.twig', [
             'participant' => $participantForm->createView()
+        ]);
+    }
+
+    #[Route('/profil/{id}', name: 'afficher_participant')]
+    public function afficherProfilParticipant(?Participant $participant): Response
+    {
+        return $this->render('profile/profilParticipant.html.twig', [
+            'participant' => $participant
         ]);
     }
 }

@@ -57,6 +57,25 @@ class SortieRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
+    public function findAllActiveSorties(?Participant $user)
+    {
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->leftJoin('s.organisateur', 'org')->addSelect('org');
+        $queryBuilder->leftJoin('s.participants', 'part')->addSelect('part');
+        $queryBuilder->leftJoin('s.lieu', 'li')->addSelect('li');
+        $queryBuilder->leftJoin('s.siteOrganisateur', 'campus')->addSelect('campus');
+        $queryBuilder->leftJoin('s.etat', 'e')->addSelect('e');
+
+        # Il est possible d'ajouter des éléments de tris dans les tableaux
+        $queryBuilder->andWhere('(e.libelle NOT IN (:etatInterdit) OR (e.libelle IN (:etatPerso) AND s.organisateur = :user))')
+            ->setParameter('etatInterdit', ['Clôturée'])
+            ->setParameter('etatPerso', ['Créée'])
+            ->setParameter('user', $user);
+
+        $query = $queryBuilder->getQuery();
+        return $query->getResult();
+    }
+
     public function afficherSortiesFiltrees(?Participant $user, Filtre $filtre)
     {
         $queryBuilder = $this->createQueryBuilder('s');
