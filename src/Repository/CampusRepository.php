@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Classe\FiltreCampus;
 use App\Entity\Campus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -40,4 +41,14 @@ class CampusRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+    public function afficherCampusFiltresParNom(string $nom)
+    {
+        $queryBuilder = $this->createQueryBuilder('c');
+        $queryBuilder->andWhere('c.nom LIKE :nom')
+            ->setParameter(':nom', '%' . $nom . '%');
+
+        $query = $queryBuilder->getQuery();
+        return $query->getResult();
+    }
 }
