@@ -12,7 +12,9 @@ use App\Repository\EtatRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\SortieRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -23,7 +25,7 @@ class SortiesController extends AbstractController
     #[Route('/index', name: 'index')]
     public function index(SortieRepository $sortieRepository,ParticipantRepository $participantRepository, Request $request): Response
     {
-        $sorties = $sortieRepository->findAllSorties();
+        $sorties = $sortieRepository->findAllActiveSorties($this->getUser());
 
         $filtre = new Filtre();
         $user = $participantRepository->find($this->getUser());
@@ -89,7 +91,7 @@ class SortiesController extends AbstractController
     }
 
     #[Route('/afficherlieux/{id}', name: 'afficher_lieux', defaults: ['id' => null])]
-    public function afficherLieuxParVille(?Ville $ville)
+    public function afficherLieuxParVille(?Ville $ville): JsonResponse
     {
         if(!$ville){
             return $this->json([], RESPONSE::HTTP_BAD_REQUEST);
@@ -98,5 +100,60 @@ class SortiesController extends AbstractController
         $listeLieux = $ville->getLieux();
 
         return $this->json($listeLieux, context: ['groups' => 'listeLieux']);
+    }
+
+    #[Route('/gestioninscription/{id}', name: 'inscription_sortie')]
+    public function gestionInscriptionSortie(?Sortie $sortie, EntityManagerInterface $entityManager): Response
+    {
+        if(!$sortie){
+            $this->addFlash(
+                'warning',
+                'Aucune sortie n\'a été trouvée, veuillez contacter l\'administrateur.'
+            );
+            return $this->redirectToRoute('sortie_index');
+        }
+
+        /** @var Participant $participant */
+        $participant = $this->getUser();
+        $now = new \DateTime('now');
+        if($sortie->getParticipants()->contains($participant)) {
+            $sortie->removeParticipant($participant);
+            $entityManager->flush();
+            $this->addFlash(
+                'success',
+                'Vous avez bien été désinscrit de la sortie ' . $sortie->getNom() . '.'
+            );
+        } elseif ($sortie->getDateLimiteInscription() <= $now){
+            $this->addFlash(
+                'warning',
+                'La date limite d\'inscription a été passée, les inscriptions sont fermées.'
+            );
+        } else {
+            $sortie->addParticipant($participant);
+            $entityManager->flush();
+
+            $this->addFlash(
+                'success',
+                'Votre inscription à la sortie ' . $sortie->getNom() . 'a bien été prise en compte.'
+            );
+        }
+
+        return $this->redirectToRoute('sortie_index');
+    }
+
+    #[Route('/detail/{id}', name: 'detail')]
+    public function afficherDetail(?Sortie $sortie): Response
+    {
+        if (!$sortie){
+            $this->addFlash(
+                'warning',
+                'Aucune sortie n\'a été trouvée, veuillez contacter l\'administrateur.'
+            );
+            return $this->redirectToRoute('sortie_index');
+        }
+
+        return $this->render('sorties/detail.html.twig', [
+            'sortie' => $sortie
+        ]);
     }
 }
