@@ -92,15 +92,16 @@
                 <td>{{ sortie.participants.count }}/{{ sortie.nbInscriptionsMax }}</td>
                 <td>{{ sortie.etat.libelle }}</td>
                 <td>........</td>
-                <td>{{ sortie.organisateur.prenom }} {{ sortie.organisateur.nom|first }}.</td>
+                <td><a href="{{ path('profils_afficher_participant', {'id' : sortie.organisateur.id }) }}">{{ sortie.organisateur.prenom }} {{ sortie.organisateur.nom|first }}.</a></td>
                 <td>
+                    <a href="{{ path('sortie_detail', {'id': sortie.id}) }}"><button class="btn btn-secondary btn-sm">Afficher</button></a>
                     {# BOUTON D'INSCRIPTION ET DE DESINSCRIPTION A UNE SORTIE #}
                     {% if sortie.etat.libelle == 'Ouverte' %}
                     <a href="{{ path('sortie_inscription_sortie', {'id' : sortie.id })}}" class="inscription-button">
                         {% if app.user not in sortie.participants %}
                             <button class="btn btn-success btn-sm">S'inscrire</button>
                         {% else %}
-                            <button class="btn btn-danger btn-sm">Se désinscrire</button>
+                            <button class="btn btn-danger btn-sm">Se désister</button>
                         {%  endif %}
                     </a>
                     {% endif %}

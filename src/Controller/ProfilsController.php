@@ -42,4 +42,12 @@ class ProfilsController extends AbstractController
             'participant' => $participantForm->createView()
         ]);
     }
+
+    #[Route('/profil/{id}', name: 'afficher_participant')]
+    public function afficherProfilParticipant(?Participant $participant): Response
+    {
+        return $this->render('profile/profilParticipant.html.twig', [
+            'participant' => $participant
+        ]);
+    }
 }
