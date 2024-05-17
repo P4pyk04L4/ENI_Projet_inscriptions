@@ -17,7 +17,7 @@
                     <div class="row">
                         {{ form_start(filtreCampus, {'attr': {'class': 'p-0 m-0 row'}}) }}
 
-                        <div class="group row col-10 ">
+                        <div class="group row col-9 ">
                             <div class="col-3 d-flex align-items-center">
                                 {{ form_label(filtreCampus.nomCampus) }}
                             </div>
@@ -27,8 +27,14 @@
                             </div>
                         </div>
 
-                        <div class="col-2">
-                            {{ form_widget(filtreCampus.searchButton) }}
+                        <div class="col-3 row">
+                            <div class="col">
+                                {{ form_widget(filtreCampus.searchButton) }}
+                            </div>
+                            <div class="col">
+                                {{ form_widget(filtreCampus.resetButton) }}
+                            </div>
+                            {{ form_end(filtreCampus) }}
                         </div>
                     </div>
                 </div>

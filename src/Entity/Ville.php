@@ -21,6 +21,7 @@ class Ville
 
     #[ORM\Column(length: 15)]
     #[Groups(['listeLieux'])]
+    #@TODO Créer un filtre pour avoir des vrais codes postaux !!!
     private ?string $codePostal = null;
 
     /**

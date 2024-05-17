@@ -2,19 +2,19 @@
 
 namespace App\Form;
 
-use App\Classe\FiltreCampus;
+use App\Classe\FiltreVille;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class FiltreCampusType extends AbstractType
+class FiltreVilleType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('nomCampus', TextType::class, [
+            ->add('nomVille', TextType::class, [
                 'label' => 'Le nom contient :'
             ])
             ->add('searchButton' , SubmitType::class, [
@@ -31,7 +31,7 @@ class FiltreCampusType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => FiltreCampus::class,
+            'data_class' => FiltreVille::class,
         ]);
     }
 }

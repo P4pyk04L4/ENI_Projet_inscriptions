@@ -40,4 +40,13 @@ class VilleRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function afficherCillesFiltreesParNom(string $nom)
+    {
+        $queryBuilder = $this->createQueryBuilder('v');
+        $queryBuilder->andWhere('v.nom LIKE :nom')
+            ->setParameter(':nom', '%' . $nom . '%');
+
+        $query = $queryBuilder->getQuery();
+        return $query->getResult();
+    }
 }
