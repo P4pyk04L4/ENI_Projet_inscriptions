@@ -11,6 +11,7 @@ use App\Form\SortieType;
 use App\Repository\EtatRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\SortieRepository;
+use App\Service\SortiesChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,7 +24,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class SortiesController extends AbstractController
 {
     #[Route('/index', name: 'index')]
-    public function index(SortieRepository $sortieRepository,ParticipantRepository $participantRepository, Request $request): Response
+    public function index(SortieRepository $sortieRepository,
+                          ParticipantRepository $participantRepository,
+                          Request $request, SortiesChecker $sortiesChecker): Response
     {
         $sorties = $sortieRepository->findAllActiveSorties($this->getUser());
 
@@ -42,6 +45,10 @@ class SortiesController extends AbstractController
                 'sorties' => $resultats,
                 'filtreForm' =>$filtreForm->createView()
             ]);
+        }
+
+        foreach ($sorties as $sortie){
+            $sortie = $sortiesChecker->checkSorties($sortie);
         }
 
         return $this->render('sorties/index.html.twig', [
@@ -117,25 +124,40 @@ class SortiesController extends AbstractController
         $participant = $this->getUser();
         $now = new \DateTime('now');
         if($sortie->getParticipants()->contains($participant)) {
-            $sortie->removeParticipant($participant);
-            $entityManager->flush();
-            $this->addFlash(
-                'success',
-                'Vous avez bien été désinscrit de la sortie ' . $sortie->getNom() . '.'
-            );
+            if($sortie->getDateHeureDebut() < $now){
+                $this->addFlash(
+                    'warning',
+                    'La sortie ' . $sortie->getNom() . ' a déjà débuté, vous ne pouvez plus vous désinscrire.'
+                );
+            } else {
+                $sortie->removeParticipant($participant);
+                $entityManager->flush();
+                $this->addFlash(
+                    'success',
+                    'Vous avez bien été désinscrit de la sortie ' . $sortie->getNom() . '.'
+                );
+            }
+
         } elseif ($sortie->getDateLimiteInscription() <= $now){
             $this->addFlash(
                 'warning',
                 'La date limite d\'inscription a été passée, les inscriptions sont fermées.'
             );
         } else {
-            $sortie->addParticipant($participant);
-            $entityManager->flush();
+            if($sortie->getEtat()->getLibelle() === "Ouverte"){
+                $sortie->addParticipant($participant);
+                $entityManager->flush();
 
-            $this->addFlash(
-                'success',
-                'Votre inscription à la sortie ' . $sortie->getNom() . 'a bien été prise en compte.'
-            );
+                $this->addFlash(
+                    'success',
+                    'Votre inscription à la sortie ' . $sortie->getNom() . ' a bien été prise en compte.'
+                );
+            } else {
+                $this->addFlash(
+                    'warning',
+                    'L\'inscription à la sortie ' . $sortie->getNom() . 'est impossible. Veuillez contacter l\'administrateur ou l\'irganisateur de la sortie.'
+                );
+            }
         }
 
         return $this->redirectToRoute('sortie_index');
