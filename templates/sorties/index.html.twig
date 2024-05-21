@@ -91,19 +91,35 @@
                 <td>{{ sortie.dateLimiteInscription|date('d/m/y') }}</td>
                 <td>{{ sortie.participants.count }}/{{ sortie.nbInscriptionsMax }}</td>
                 <td>{{ sortie.etat.libelle }}</td>
-                <td>........</td>
+                <td>
+                    {% if app.user in sortie.participants %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="green" class="bi bi-calendar-check" viewBox="0 0 16 16">
+                        <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0"/>
+                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                    </svg>
+                    {% endif %}
+                </td>
                 <td><a href="{{ path('profils_afficher_participant', {'id' : sortie.organisateur.id }) }}">{{ sortie.organisateur.prenom }} {{ sortie.organisateur.nom|first }}.</a></td>
                 <td>
                     <a href="{{ path('sortie_detail', {'id': sortie.id}) }}"><button class="btn btn-secondary btn-sm">Afficher</button></a>
                     {# BOUTON D'INSCRIPTION ET DE DESINSCRIPTION A UNE SORTIE #}
-                    {% if sortie.etat.libelle == 'Ouverte' %}
+
                     <a href="{{ path('sortie_inscription_sortie', {'id' : sortie.id })}}" class="inscription-button">
                         {% if app.user not in sortie.participants %}
-                            <button class="btn btn-success btn-sm">S'inscrire</button>
+                            {% if sortie.etat.libelle == 'Ouverte' %}
+                                <button class="btn btn-success btn-sm">S'inscrire</button>
+                            {% endif %}
                         {% else %}
-                            <button class="btn btn-danger btn-sm">Se désister</button>
+                            {% if sortie.etat.libelle in ['Ouverte', 'Clôturée'] %}
+                                <button class="btn btn-danger btn-sm">Se désister</button>
+                            {% endif %}
                         {%  endif %}
                     </a>
+
+                    {% if sortie.etat.libelle in ['Créée', 'Ouverte'] and sortie.organisateur.id is same as app.user.id %}
+                        <a href="{{ path('sortie_annuler', {'id' : sortie.id }) }}">
+                            <button class="btn btn-sm btn-warning">Annuler</button>
+                        </a>
                     {% endif %}
 
                 </td>
@@ -133,7 +149,7 @@
         //         fetch(urlInscriptionButton, {
         //             method : 'GET',
         //             headers : {
-        //                 'Content-Type': 'applicaion/json'
+        //                 'Content-Type': 'application/json'
         //             }
         //         })
         //             .then(function(response) {

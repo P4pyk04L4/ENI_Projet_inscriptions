@@ -145,7 +145,7 @@
                                 {% for participant in sortie.participants %}
                                     <tr>
                                         <td>{{ participant.pseudo }}</td>
-                                        <td>{{ participant.pseudo }}</td>
+                                        <td>{{ participant.nom }} {{ participant.prenom }}</td>
                                         <td>
                                             <a href="{{ path('profils_afficher_participant', {'id' : participant.id }) }}">
                                                 <button class="btn btn-sm btn-secondary">Voir le profil</button>
