@@ -60,7 +60,8 @@ class SortieRepository extends ServiceEntityRepository
     public function findAllActiveSorties(?Participant $user)
     {
         $queryBuilder = $this->createQueryBuilder('s');
-        $queryBuilder->leftJoin('s.organisateur', 'org')->addSelect('org');
+        $queryBuilder->leftJoin('s.organisateur', 'org')->addSelect('org')
+        ->leftJoin('org.photosProfil', 'photosProfil')->addSelect('photosProfil');
         $queryBuilder->leftJoin('s.participants', 'part')->addSelect('part');
         $queryBuilder->leftJoin('s.lieu', 'li')->addSelect('li');
         $queryBuilder->leftJoin('s.siteOrganisateur', 'campus')->addSelect('campus');
@@ -68,9 +69,21 @@ class SortieRepository extends ServiceEntityRepository
 
         # Il est possible d'ajouter des éléments de tris dans les tableaux
         $queryBuilder->andWhere('(e.libelle NOT IN (:etatInterdit) OR (e.libelle IN (:etatPerso) AND s.organisateur = :user))')
-            ->setParameter('etatInterdit', ['Clôturée'])
+            ->setParameter('etatInterdit', [''])
             ->setParameter('etatPerso', ['Créée'])
             ->setParameter('user', $user);
+
+        $now = new \DateTime("now");
+        $dateLimite = $now->modify('-1 month');
+        $queryBuilder
+            ->andWhere('s.dateHeureDebut > :dateLimite')
+            ->setParameter('dateLimite', $dateLimite);
+
+        # MISE DES ACTIVITES PASSEES EN BAS DU TABLEAU, PUIS PAR DATE
+        $queryBuilder->addSelect("(CASE WHEN e.libelle like 'Activité passée' THEN 0 ELSE 1 END) AS HIDDEN ORD");
+        $queryBuilder->addOrderBy('ORD', 'DESC');
+
+        $queryBuilder->addOrderBy('s.dateHeureDebut', 'ASC');
 
         $query = $queryBuilder->getQuery();
         return $query->getResult();
@@ -110,7 +123,7 @@ class SortieRepository extends ServiceEntityRepository
         }
         if($filtre->getSortiesPassees()){
             $now = new \DateTime("now");
-            $queryBuilder->andWhere('s.dateHeureDebut + (s.duree * 60) < :now')->setParameter('now', $now);
+            $queryBuilder->andWhere('e.libelle IN (:etatPasse)')->setParameter('etatPasse', ['Activité passée']);
         }
 
         $query = $queryBuilder->getQuery();

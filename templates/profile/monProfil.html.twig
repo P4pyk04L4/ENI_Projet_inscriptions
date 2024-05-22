@@ -2,9 +2,21 @@
 
 {% block body %}
 
-    <div class="corps container-fluid h-100">
-        <div class="row h-100 align-items-center justify-content-center">
+    <div class="row">
+            <div class="col-sm-4 col-md-6 col-lg-4">
+                <div class="mt-5" style="height: 250px; width: 250px;">
+                    {% if app.user.photosProfil is not empty %}
+                        <img src="{{ asset(app.user.photosProfil.first.cheminAcces) }}" alt="Photo de profil"  style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="250" height="250" fill="grey" class="bi bi-person-circle" viewBox="0 0 16 16">
+                            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                            <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                        </svg>
+                    {% endif %}
+                </div>
+            </div>
             <div class="col-lg-4 col-md-6 col-sm-8">
+
                 <div class="d-flex justify-content-center py-3">
                     <h1>{{ app.user.pseudo }}</h1>
                 </div>

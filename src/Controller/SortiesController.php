@@ -2,18 +2,22 @@
 
 namespace App\Controller;
 
+use App\Classe\Annulation;
 use App\Classe\Filtre;
 use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Entity\Ville;
+use App\Form\AnnulationSortieType;
 use App\Form\FiltreType;
 use App\Form\SortieType;
 use App\Repository\EtatRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\SortieRepository;
+use App\Service\SortiesChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +27,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class SortiesController extends AbstractController
 {
     #[Route('/index', name: 'index')]
-    public function index(SortieRepository $sortieRepository,ParticipantRepository $participantRepository, Request $request): Response
+    public function index(SortieRepository $sortieRepository,
+                          ParticipantRepository $participantRepository,
+                          Request $request, SortiesChecker $sortiesChecker): Response
     {
         $sorties = $sortieRepository->findAllActiveSorties($this->getUser());
 
@@ -44,8 +50,11 @@ class SortiesController extends AbstractController
             ]);
         }
 
+        foreach ($sorties as $sortie){
+            $sortie = $sortiesChecker->checkSorties($sortie);
+        }
+
         return $this->render('sorties/index.html.twig', [
-            'controller_name' => 'SortiesController',
             'sorties' => $sorties,
             'filtreForm' =>$filtreForm->createView()
         ]);
@@ -66,10 +75,10 @@ class SortiesController extends AbstractController
 
         if($sortieForm->isSubmitted() && $sortieForm->isValid()){
 
-            if($sortieForm->getClickedButton() && 'btnEnregistrer' === $sortieForm->getClickedButton()->getName()){
+            if($request->request->has('btnEnregistrer')){
                 $etat = $etatRepository->findOneBy(['libelle' => 'Créée']);
                 $sortie->setEtat($etat);
-            } else if($sortieForm->getClickedButton() && 'btnPublier' === $sortieForm->getClickedButton()->getName()){
+            } else if($request->request->has('btnPublier')){
                 $etat = $etatRepository->findOneBy(['libelle' => 'Ouverte']);
                 $sortie->setEtat($etat);
             }
@@ -86,7 +95,8 @@ class SortiesController extends AbstractController
         }
 
         return $this->render('sorties/nouvelle.html.twig',[
-            'sortieForm' => $sortieForm->createView()
+            'fonction' => 'creation',
+            'sortieForm' => $sortieForm->createView(),
         ]);
     }
 
@@ -117,25 +127,40 @@ class SortiesController extends AbstractController
         $participant = $this->getUser();
         $now = new \DateTime('now');
         if($sortie->getParticipants()->contains($participant)) {
-            $sortie->removeParticipant($participant);
-            $entityManager->flush();
-            $this->addFlash(
-                'success',
-                'Vous avez bien été désinscrit de la sortie ' . $sortie->getNom() . '.'
-            );
+            if($sortie->getDateHeureDebut() < $now){
+                $this->addFlash(
+                    'warning',
+                    'La sortie ' . $sortie->getNom() . ' a déjà débuté, vous ne pouvez plus vous désinscrire.'
+                );
+            } else {
+                $sortie->removeParticipant($participant);
+                $entityManager->flush();
+                $this->addFlash(
+                    'success',
+                    'Vous avez bien été désinscrit de la sortie ' . $sortie->getNom() . '.'
+                );
+            }
+
         } elseif ($sortie->getDateLimiteInscription() <= $now){
             $this->addFlash(
                 'warning',
                 'La date limite d\'inscription a été passée, les inscriptions sont fermées.'
             );
         } else {
-            $sortie->addParticipant($participant);
-            $entityManager->flush();
+            if($sortie->getEtat()->getLibelle() === "Ouverte"){
+                $sortie->addParticipant($participant);
+                $entityManager->flush();
 
-            $this->addFlash(
-                'success',
-                'Votre inscription à la sortie ' . $sortie->getNom() . 'a bien été prise en compte.'
-            );
+                $this->addFlash(
+                    'success',
+                    'Votre inscription à la sortie ' . $sortie->getNom() . ' a bien été prise en compte.'
+                );
+            } else {
+                $this->addFlash(
+                    'warning',
+                    'L\'inscription à la sortie ' . $sortie->getNom() . 'est impossible. Veuillez contacter l\'administrateur ou l\'irganisateur de la sortie.'
+                );
+            }
         }
 
         return $this->redirectToRoute('sortie_index');
@@ -154,6 +179,91 @@ class SortiesController extends AbstractController
 
         return $this->render('sorties/detail.html.twig', [
             'sortie' => $sortie
+        ]);
+    }
+
+    #[Route('/annuler/{id}', name: 'annuler')]
+    public function annulerSortie(?Sortie $sortie, Request $request, EntityManagerInterface $entityManager, EtatRepository $etatRepository){
+        $annulation = new Annulation();
+        $annulationForm = $this->createForm(AnnulationSortieType::class, $annulation);
+        $annulationForm->handleRequest($request);
+        $now = new \DateTime('now');
+
+        if($sortie->getOrganisateur() !== $this->getUser()){
+
+            $this->addFlash(
+                'danger',
+                'Vous ne pouvez pas annuler une sortie que vous n\'avez pas créée.'
+            );
+
+            $this->redirectToRoute('sortie_index');
+
+        }
+        if($sortie->getDateHeureDebut() < $now){
+            $this->addFlash(
+                'danger',
+                'Il est impossible d\'annuler une sortie qui a déjà débuté.'
+            );
+
+            $this->redirectToRoute('sortie_index');
+        }
+
+        if($annulationForm->isSubmitted() && $annulationForm->isValid()){
+            $nouvelleDescription = $sortie->getInfosSortie() . ' /// SORTIE ANNULEE /// Motif : ' . $annulation->getMotifAnnulation();
+            $sortie->setInfosSortie($nouvelleDescription);
+            $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Annulée']));
+            $entityManager->flush();
+
+            $this->addFlash(
+                'success',
+                'La sortie a bien été annulée.'
+            );
+
+            return $this->redirectToRoute('sortie_index');
+        }
+
+        return $this->render('sorties/annulation.html.twig', [
+            'sortie' => $sortie,
+            'annulationForm' => $annulationForm->createView()
+        ]);
+    }
+
+    #[Route('/modifier/{id}', name: 'modifier')]
+    public function modifierSortie(?Sortie $sortie, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if(!$sortie){
+            $this->addFlash(
+                'danger',
+                'Aucune sortie n\'a été trouvée.'
+            );
+
+            return $this->redirectToRoute('sortie_index');
+        }
+
+        if($sortie->getOrganisateur() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')){
+            throw new AccessDeniedException('Accès refusé');
+        }
+
+        $sortieForm = $this->createForm(SortieType::class, $sortie);
+        $sortieForm->handleRequest($request);
+
+        if($sortieForm->isSubmitted() && $sortieForm->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash(
+                'success',
+                'La sortie a été modifiée avec succès.'
+            );
+
+            return $this->redirectToRoute('sortie_index');
+        }
+
+        return $this->render('sorties/nouvelle.html.twig',
+        [
+            'fonction' => 'modification',
+            'sortieForm' => $sortieForm,
+            'sortie' => $sortie
+
         ]);
     }
 }

@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ sortie.nom }} - Annulation
+{% endblock %}
+
+{% block body %}
+<div class="corps container-fluid h-100">
+    <div class="row h-100 align-items-center justify-content-center">
+        <div class="col-lg-4 col-md-6 col-sm-8">
+            <div class="d-flex justify-content-center py-3">
+                <h1>Annuler une sortie</h1>
+            </div>
+            {{ form_start(annulationForm) }}
+            <table class="table py-3">
+                <tr>
+                    <td>Nom de la sortie</td>
+                    <td>{{ sortie.nom }}</td>
+                </tr>
+                <tr>
+                    <td>Date de la sortie</td>
+                    <td>{{ sortie.dateHeureDebut|date('d/m/y') }}</td>
+                </tr>
+                <tr>
+                    <td>Campus</td>
+                    <td>{{ sortie.siteOrganisateur.nom }}</td>
+                </tr>
+                <tr>
+                    <td>Lieu</td>
+                    <td>{{ sortie.lieu.nom }}</td>
+                </tr>
+                <tr>
+                    <td>Motif</td>
+                    <td>
+
+                        {{ form_widget(annulationForm.motifAnnulation) }}
+                        {{ form_errors(annulationForm.motifAnnulation) }}
+
+                    </td>
+                </tr>
+            </table>
+            <div class="my-3">
+                {{ form_widget(annulationForm.saveButton) }}
+
+            </div>
+            {{ form_end(annulationForm) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
