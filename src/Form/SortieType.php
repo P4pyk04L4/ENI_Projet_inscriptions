@@ -69,14 +69,15 @@ class SortieType extends AbstractType
                 'placeholder' => 'Choisissez un lieu',
                 'choices' => []
             ])
-            ->add('btnEnregistrer', SubmitType::class, [
-                'label' => 'Enregistrer',
-                'attr' => ['class' => 'btn btn-primary']
-            ])
-            ->add('btnPublier', SubmitType::class, [
-                'label' => 'Publier la sortie',
-                'attr' => ['class' => 'btn btn-secondary']
-            ]);
+//            ->add('btnEnregistrer', SubmitType::class, [
+//                'label' => 'Enregistrer',
+//                'attr' => ['class' => 'btn btn-primary']
+//            ])
+//            ->add('btnPublier', SubmitType::class, [
+//                'label' => 'Publier la sortie',
+//                'attr' => ['class' => 'btn btn-secondary']
+//            ])
+        ;
 
             $formModifier = function(FormInterface $form, ?Ville $ville = null):void
             {
@@ -91,10 +92,17 @@ class SortieType extends AbstractType
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) use ($formModifier): void {
             $data = $event->getData();
             $lieux = $data->getLieu();
+            $form = $event->getForm();
 
             if ($data instanceof Sortie && $lieux) {
                 $ville = $lieux->getVille();
                 $formModifier($event->getForm(), $ville);
+                $form->add('ville', EntityType::class, [
+                    'class' => Ville::class,
+                    'mapped' => false,
+                    'choice_label' => 'nom',
+                    'data' => $ville
+                    ]);
             }
         });
 

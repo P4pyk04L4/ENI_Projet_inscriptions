@@ -60,7 +60,8 @@ class SortieRepository extends ServiceEntityRepository
     public function findAllActiveSorties(?Participant $user)
     {
         $queryBuilder = $this->createQueryBuilder('s');
-        $queryBuilder->leftJoin('s.organisateur', 'org')->addSelect('org');
+        $queryBuilder->leftJoin('s.organisateur', 'org')->addSelect('org')
+        ->leftJoin('org.photosProfil', 'photosProfil')->addSelect('photosProfil');
         $queryBuilder->leftJoin('s.participants', 'part')->addSelect('part');
         $queryBuilder->leftJoin('s.lieu', 'li')->addSelect('li');
         $queryBuilder->leftJoin('s.siteOrganisateur', 'campus')->addSelect('campus');

@@ -5,7 +5,11 @@
     <div class="row h-100 align-items-center justify-content-center">
         <div class="col-lg-10 col-md-11 col-sm-12">
             <div class="d-flex justify-content-center py-3">
-                <h1>Créer une sortie</h1>
+                {% if fonction is same as 'creation' %}
+                    <h1>Créer une sortie</h1>
+                {% elseif fonction is same as 'modification' %}
+                    <h1>Modifier une sortie</h1>
+                {% endif %}
             </div>
 
             {# FORMULAIRE #}
@@ -88,7 +92,12 @@
                         {{ form_label(sortieForm.ville) }}
                     </div>
                     <div class="col">
-                        {{ form_widget(sortieForm.ville, {'attr': {'urllieu': path('sortie_afficher_lieux', {'id': ''})}}) }}
+                        {% set villeAttr = {'attr': {'urllieu': path('sortie_afficher_lieux', {'id': ''})}} %}
+                        {% if fonction is same as 'modification' %}
+{#                            {% set villeAttr = villeAttr|merge({'placeholder': sortie.lieu.ville.nom}) %}#}
+                            {% set selectedVilleId = sortie.lieu.ville.id %}
+                        {% endif %}
+                        {{ form_widget(sortieForm.ville, villeAttr) }}
                         {{ form_errors(sortieForm.ville) }}
 
                     </div>
@@ -98,7 +107,11 @@
                         {{ form_label(sortieForm.lieu) }}
                     </div>
                     <div class="col">
-                        {{ form_widget(sortieForm.lieu) }}
+                        {% set lieuAttr = [] %}
+                        {% if fonction is same as 'modification' %}
+                            {% set lieuAttr = lieuAttr|merge({'disabled': false }) %}
+                        {% endif %}
+                        {{ form_widget(sortieForm.lieu, lieuAttr) }}
                         {{ form_errors(sortieForm.lieu) }}
                     </div>
                 </div>
@@ -107,7 +120,11 @@
                         <p>Rue :</p>
                     </div>
                     <div class="col">
-                        <p id="lieuRue"></p>
+                        <p id="lieuRue">
+                            {% if fonction is same as 'modification' %}
+                                {{ sortie.lieu.rue }}
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
                 <div class="group row mb-3">
@@ -115,7 +132,11 @@
                         <p>Code postal :</p>
                     </div>
                     <div class="col">
-                        <p id="lieuCodePostal"></p>
+                        <p id="lieuCodePostal">
+                            {% if fonction is same as 'modification' %}
+                                {{ sortie.lieu.ville.codePostal }}
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
                 <div class="group row mb-3">
@@ -123,7 +144,11 @@
                         <p>Latitude :</p>
                     </div>
                     <div class="col">
-                        <p id="lieuLatitude"></p>
+                        <p id="lieuLatitude">
+                            {% if fonction is same as 'modification' %}
+                                {{ sortie.lieu.latitude }}
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
                 <div class="group row mb-3">
@@ -131,9 +156,19 @@
                         <p>Longitude :</p>
                     </div>
                     <div class="col">
-                        <p id="lieuLongitude"></p>
+                        <p id="lieuLongitude">
+                            {% if fonction is same as 'modification' %}
+                                {{ sortie.lieu.longitude }}
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
+            </div>
+            <div>
+                <button type="submit" id="sortie_btnEnregistrer" name="btnEnregistrer" class="btn btn-primary btn">Enregistrer</button>
+                {% if fonction is same as 'creation' %}
+                    <button type="submit" id="sortie_btnPublier" name="btnPublier" class="btn btn-success btn">Publier la sortie</button>
+                {% endif %}
             </div>
             {{ form_end(sortieForm) }}
 
@@ -145,15 +180,23 @@
 {% endblock %}
 
 {% block title %}
-    Créer une sortie
+    {% if fonction is same as 'creation' %}
+        Créer une sortie
+    {% elseif fonction is same as 'modification' %}
+        {{ sortie.nom }} - Modifier une sortie
+    {% endif %}
 {% endblock %}
 
 {% block scripts %}
-    <script type="module">
-        import axios from 'axios'
 
+    {% if fonction is same as 'creation' %}
+    <script>
         let choixLieu = document.querySelector('#sortie_lieu');
         choixLieu.disabled = true;
+    </script>
+    {% endif %}
+    <script type="module">
+        import axios from 'axios'
 
         let choixVille = document.querySelector('#sortie_ville')
         let lieuRue = document.querySelector('#lieuRue');

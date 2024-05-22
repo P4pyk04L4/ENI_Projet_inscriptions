@@ -17,6 +17,7 @@ use App\Service\SortiesChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -74,10 +75,10 @@ class SortiesController extends AbstractController
 
         if($sortieForm->isSubmitted() && $sortieForm->isValid()){
 
-            if($sortieForm->getClickedButton() && 'btnEnregistrer' === $sortieForm->getClickedButton()->getName()){
+            if($request->request->has('btnEnregistrer')){
                 $etat = $etatRepository->findOneBy(['libelle' => 'Créée']);
                 $sortie->setEtat($etat);
-            } else if($sortieForm->getClickedButton() && 'btnPublier' === $sortieForm->getClickedButton()->getName()){
+            } else if($request->request->has('btnPublier')){
                 $etat = $etatRepository->findOneBy(['libelle' => 'Ouverte']);
                 $sortie->setEtat($etat);
             }
@@ -94,7 +95,8 @@ class SortiesController extends AbstractController
         }
 
         return $this->render('sorties/nouvelle.html.twig',[
-            'sortieForm' => $sortieForm->createView()
+            'fonction' => 'creation',
+            'sortieForm' => $sortieForm->createView(),
         ]);
     }
 
@@ -223,6 +225,45 @@ class SortiesController extends AbstractController
         return $this->render('sorties/annulation.html.twig', [
             'sortie' => $sortie,
             'annulationForm' => $annulationForm->createView()
+        ]);
+    }
+
+    #[Route('/modifier/{id}', name: 'modifier')]
+    public function modifierSortie(?Sortie $sortie, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if(!$sortie){
+            $this->addFlash(
+                'danger',
+                'Aucune sortie n\'a été trouvée.'
+            );
+
+            return $this->redirectToRoute('sortie_index');
+        }
+
+        if($sortie->getOrganisateur() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')){
+            throw new AccessDeniedException('Accès refusé');
+        }
+
+        $sortieForm = $this->createForm(SortieType::class, $sortie);
+        $sortieForm->handleRequest($request);
+
+        if($sortieForm->isSubmitted() && $sortieForm->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash(
+                'success',
+                'La sortie a été modifiée avec succès.'
+            );
+
+            return $this->redirectToRoute('sortie_index');
+        }
+
+        return $this->render('sorties/nouvelle.html.twig',
+        [
+            'fonction' => 'modification',
+            'sortieForm' => $sortieForm,
+            'sortie' => $sortie
+
         ]);
     }
 }
