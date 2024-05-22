@@ -64,10 +64,17 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $pseudo = null;
 
+    /**
+     * @var Collection<int, PhotoProfil>
+     */
+    #[ORM\OneToMany(targetEntity: PhotoProfil::class, mappedBy: 'participant', orphanRemoval: true)]
+    private Collection $photosProfil;
+
     public function __construct()
     {
         $this->sortiesOrganisees = new ArrayCollection();
         $this->sorties = new ArrayCollection();
+        $this->photosProfil = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -269,6 +276,36 @@ class Participant implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPseudo(string $pseudo): static
     {
         $this->pseudo = $pseudo;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PhotoProfil>
+     */
+    public function getPhotosProfil(): Collection
+    {
+        return $this->photosProfil;
+    }
+
+    public function addPhotosProfil(PhotoProfil $photosProfil): static
+    {
+        if (!$this->photosProfil->contains($photosProfil)) {
+            $this->photosProfil->add($photosProfil);
+            $photosProfil->setParticipant($this);
+        }
+
+        return $this;
+    }
+
+    public function removePhotosProfil(PhotoProfil $photosProfil): static
+    {
+        if ($this->photosProfil->removeElement($photosProfil)) {
+            // set the owning side to null (unless already changed)
+            if ($photosProfil->getParticipant() === $this) {
+                $photosProfil->setParticipant(null);
+            }
+        }
 
         return $this;
     }

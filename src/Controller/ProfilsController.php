@@ -3,13 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\Participant;
+use App\Entity\PhotoProfil;
 use App\Form\ParticipantType;
-use App\Repository\ParticipantRepository;
+use App\Form\PhotoProfilType;
+use App\Repository\PhotoProfilRepository;
+use App\Service\FileUploader;
+use App\Service\SortiesChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/profils', name: 'profils_')]
 class ProfilsController extends AbstractController
@@ -21,14 +26,28 @@ class ProfilsController extends AbstractController
     }
 
     #[Route('/monprofil/modifier', name: 'monProfil_modifier')]
-    public function modifier(ParticipantRepository $participantRepository, Request $request, EntityManagerInterface $entityManager): Response
+    public function modifier(Request $request, EntityManagerInterface $entityManager,
+                             FileUploader $fileUploader): Response
     {
         /** @var Participant $participant */
         $participant = $this->getUser();
         $participantForm = $this->createForm(ParticipantType::class, $participant);
         $participantForm->handleRequest($request);
 
+        $newPhoto = new PhotoProfil();
+        $newPhoto->setDateUpload(new \DateTime('now'))
+            ->setParticipant($this->getUser())
+            ->setPhotoActive(true);
+
         if($participantForm->isSubmitted() && $participantForm->isValid()){
+            $fichierPhoto = $participantForm->get('photoProfil')->getData();
+            if($fichierPhoto){
+                $photoCheck = $fileUploader->checkAndUpload($fichierPhoto);
+                $newPhoto->setNom($photoCheck->getNom())
+                    ->setCheminAcces($photoCheck->getCheminAcces());
+                $entityManager->persist($newPhoto);
+            }
+
             $entityManager->flush();
 
             $this->addFlash(
@@ -39,7 +58,7 @@ class ProfilsController extends AbstractController
         }
 
         return $this->render('profile/modifier.html.twig', [
-            'participant' => $participantForm->createView()
+            'participant' => $participantForm->createView(),
         ]);
     }
 
