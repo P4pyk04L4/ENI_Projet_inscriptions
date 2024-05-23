@@ -27,5 +27,10 @@ services:
             $dossierPhotos: '%dossier_photos%'
             $dossierPhotosAffichage: '%dossier_photos_affichage%'
 
+#    App\EventListener\ExceptionListener:
+#        tags: [kernel.event_listener]
+    App\Security\AccessDeniedHandler:
+
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -1,8 +1,6 @@
 <?php
 
-namespace App\Classe;
-
-use App\Entity\Campus;
+namespace App\Entity;
 
 class Filtre
 {

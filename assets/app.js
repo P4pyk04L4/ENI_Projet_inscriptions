@@ -8,6 +8,6 @@ import './bootstrap.js';
 import './styles/app.css';
 
 // Import du CSS du framework Bootstrap :
-import 'bootstrap/dist/css/bootstrap.min.css';
+import './vendor/bootstrap/dist/css/bootstrap.min.css';
 // Import du JS du framework Bootstrap :
-import 'bootstrap/bootstrap.index.js';
+import './vendor/bootstrap/bootstrap.index.js';

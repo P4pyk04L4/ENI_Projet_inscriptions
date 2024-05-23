@@ -62,8 +62,8 @@ class ProfilsController extends AbstractController
         ]);
     }
 
-    #[Route('/profil/{id}', name: 'afficher_participant')]
-    public function afficherProfilParticipant(?Participant $participant): Response
+    #[Route('/profil/{id}', name: 'afficher_participant', requirements: ['id' => '\d+'])]
+    public function afficherProfilParticipant(Participant $participant): Response
     {
         return $this->render('profile/profilParticipant.html.twig', [
             'participant' => $participant

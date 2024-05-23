@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PhotoProfilRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PhotoProfilRepository::class)]
 class PhotoProfil
@@ -15,12 +16,16 @@ class PhotoProfil
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
     private ?string $cheminAcces = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotBlank]
+    #[Assert\DateTime]
     private ?\DateTimeInterface $dateUpload = null;
 
     #[ORM\ManyToOne(inversedBy: 'photosProfil')]

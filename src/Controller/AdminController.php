@@ -2,10 +2,9 @@
 
 namespace App\Controller;
 
-use App\Classe\Filtre;
-use App\Classe\FiltreCampus;
-use App\Classe\FiltreVille;
 use App\Entity\Campus;
+use App\Entity\FiltreCampus;
+use App\Entity\FiltreVille;
 use App\Entity\Ville;
 use App\Form\CampusType;
 use App\Form\FiltreCampusType;
@@ -57,11 +56,6 @@ class AdminController extends AbstractController
                 $campus = $campusRepository->findAll();
             }
 
-            return $this->render('admin/campus.html.twig', [
-                'campus' => $campus,
-                'campusForm' =>$campusForm->createView(),
-                'filtreCampus' => $filtreCampusForm->createView()
-            ]);
         }
 
         return $this->render('admin/campus.html.twig', [
@@ -92,6 +86,8 @@ class AdminController extends AbstractController
                 'success',
                 'La ville a bien été ajoutée à la base de données.'
             );
+
+            return $this->redirectToRoute('admin_villes');
         }
 
         if($filtreVilleForm->isSubmitted() && $filtreVilleForm->isValid()){
@@ -102,11 +98,6 @@ class AdminController extends AbstractController
                 $villes= $villeRepository->findAll();
             }
 
-            return $this->render('admin/villes.html.twig', [
-                'villes' => $villes,
-                'villeForm' => $villeForm->createView(),
-                'filtreVilleForm' => $filtreVilleForm->createView()
-            ]);
         }
 
         return $this->render('admin/villes.html.twig', [
