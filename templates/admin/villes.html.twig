@@ -42,6 +42,8 @@
 
 
                 {# TABLEAU DES CAMPUS #}
+                {{ form_start(villeForm) }}
+
                 <table class="table table-light">
                     <thead>
                     <th>Ville</th>
@@ -65,7 +67,6 @@
                     {% endfor %}
                     <tr>
                         <td>
-                            {{ form_start(villeForm) }}
                             {{ form_widget(villeForm.nom) }}
                             {{ form_errors(villeForm.nom) }}
                         </td>
@@ -75,11 +76,12 @@
                         </td>
                         <td>
                             {{ form_row(villeForm.addButton) }}
-                            {{ form_end(villeForm) }}
                         </td>
                     </tr>
                     </tbody>
                 </table>
+                {{ form_end(villeForm) }}
+
             </div>
         </div>
     </div>

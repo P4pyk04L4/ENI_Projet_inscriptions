@@ -58,7 +58,7 @@ class ProfilsController extends AbstractController
         }
 
         return $this->render('profile/modifier.html.twig', [
-            'participant' => $participantForm->createView(),
+            'participant' => $participantForm,
         ]);
     }
 

@@ -31,3 +31,8 @@ header {
 footer {
     background: linear-gradient(45deg, #02002A, #150579);
 }
+
+label.required:after {
+    content: " *";
+    color: red;
+}

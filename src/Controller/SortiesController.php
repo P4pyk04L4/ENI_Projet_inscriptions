@@ -10,9 +10,7 @@ use App\Form\AnnulationSortieType;
 use App\Form\FiltreType;
 use App\Form\SortieType;
 use App\Repository\EtatRepository;
-use App\Repository\ParticipantRepository;
 use App\Repository\SortieRepository;
-use App\Service\SortiesChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,35 +24,25 @@ class SortiesController extends AbstractController
 {
     #[Route('/index', name: 'index')]
     public function index(SortieRepository $sortieRepository,
-                          ParticipantRepository $participantRepository,
-                          Request $request, SortiesChecker $sortiesChecker): Response
+                          Request $request): Response
     {
-        $sorties = $sortieRepository->findAllActiveSorties($this->getUser());
+        /** @var Participant $user */
+        $user = $this->getUser();
+
+        $sorties = $sortieRepository->findAllActiveSorties($user);
 
         $filtre = new Filtre();
-        $user = $participantRepository->find($this->getUser());
         $filtre->setCampus($user->getCampus());
         $filtreForm = $this->createForm(FiltreType::class, $filtre);
         $filtreForm->handleRequest($request);
 
         if($filtreForm->isSubmitted() && $filtreForm->isValid()){
-            $filtre = $filtreForm->getData();
-            $resultats = $sortieRepository->afficherSortiesFiltrees($user, $filtre);
-
-            return $this->render('sorties/index.html.twig', [
-                'controller_name' => 'SortiesController',
-                'sorties' => $resultats,
-                'filtreForm' =>$filtreForm->createView()
-            ]);
+            $sorties = $sortieRepository->afficherSortiesFiltrees($user, $filtre);
         }
-
-//        foreach ($sorties as $sortie){
-//            $sortie = $sortiesChecker->checkSorties($sortie);
-//        }
 
         return $this->render('sorties/index.html.twig', [
             'sorties' => $sorties,
-            'filtreForm' =>$filtreForm->createView()
+            'filtreForm' =>$filtreForm
         ]);
     }
 
@@ -94,7 +82,7 @@ class SortiesController extends AbstractController
 
         return $this->render('sorties/nouvelle.html.twig',[
             'fonction' => 'creation',
-            'sortieForm' => $sortieForm->createView(),
+            'sortieForm' => $sortieForm,
         ]);
     }
 
@@ -197,7 +185,7 @@ class SortiesController extends AbstractController
 
         return $this->render('sorties/annulation.html.twig', [
             'sortie' => $sortie,
-            'annulationForm' => $annulationForm->createView()
+            'annulationForm' => $annulationForm
         ]);
     }
 

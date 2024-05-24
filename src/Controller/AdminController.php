@@ -60,8 +60,8 @@ class AdminController extends AbstractController
 
         return $this->render('admin/campus.html.twig', [
             'campus' => $campus,
-            'campusForm' =>$campusForm->createView(),
-            'filtreCampus' => $filtreCampusForm->createView()
+            'campusForm' =>$campusForm,
+            'filtreCampus' => $filtreCampusForm
         ]);
     }
 
@@ -102,8 +102,8 @@ class AdminController extends AbstractController
 
         return $this->render('admin/villes.html.twig', [
             'villes' => $villes,
-            'villeForm' => $villeForm->createView(),
-            'filtreVilleForm' => $filtreVilleForm->createView()
+            'villeForm' => $villeForm,
+            'filtreVilleForm' => $filtreVilleForm
         ]);
     }
 }
