@@ -29,7 +29,12 @@ services:
 
 #    App\EventListener\ExceptionListener:
 #        tags: [kernel.event_listener]
-    App\Security\AccessDeniedHandler:
+    App\EntityListener\SortiesListener:
+        arguments:
+            $etatRepository: '@App\Repository\EtatRepository'
+            $entityManager: '@doctrine.orm.entity_manager'
+        tags:
+            - {name: 'doctrine.orm.entity_listener', event: 'postLoad'}
 
 
     # add more service definitions when explicit configuration is needed

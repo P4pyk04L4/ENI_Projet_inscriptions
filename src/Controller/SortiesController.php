@@ -48,9 +48,9 @@ class SortiesController extends AbstractController
             ]);
         }
 
-        foreach ($sorties as $sortie){
-            $sortie = $sortiesChecker->checkSorties($sortie);
-        }
+//        foreach ($sorties as $sortie){
+//            $sortie = $sortiesChecker->checkSorties($sortie);
+//        }
 
         return $this->render('sorties/index.html.twig', [
             'sorties' => $sorties,

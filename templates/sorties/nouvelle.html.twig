@@ -42,7 +42,6 @@
                     <div class="col">
                         {{ form_widget(sortieForm.dateLimiteInscription) }}
                         {{ form_errors(sortieForm.dateLimiteInscription) }}
-
                     </div>
                 </div>
                 <div class="group row mb-3">
@@ -206,7 +205,7 @@
 
         let jsonArray;
 
-        choixVille.addEventListener('change', function(e){
+        choixVille.addEventListener('change', function(){
             let villeId = this.value;
             let url = this.getAttribute('urllieu') + '/' + villeId;
 
