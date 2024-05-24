@@ -35,7 +35,7 @@ class Sortie
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotNull]
-    #[Assert\LessThan(propertyPath: "dateHeureDebut", message: "Vous devez sélectionner une date de limite d\'inscription antérieure à la date de sortie")]
+    #[Assert\LessThan(propertyPath: "dateHeureDebut")]
     private ?\DateTimeInterface $dateLimiteInscription = null;
 
     #[ORM\Column]

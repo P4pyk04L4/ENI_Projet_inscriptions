@@ -44,7 +44,7 @@ class SortiesController extends AbstractController
             return $this->render('sorties/index.html.twig', [
                 'controller_name' => 'SortiesController',
                 'sorties' => $resultats,
-                'filtreForm' =>$filtreForm->createView()
+                'filtreForm' =>$filtreForm
             ]);
         }
 
@@ -54,7 +54,7 @@ class SortiesController extends AbstractController
 
         return $this->render('sorties/index.html.twig', [
             'sorties' => $sorties,
-            'filtreForm' =>$filtreForm->createView()
+            'filtreForm' =>$filtreForm
         ]);
     }
 
@@ -94,7 +94,7 @@ class SortiesController extends AbstractController
 
         return $this->render('sorties/nouvelle.html.twig',[
             'fonction' => 'creation',
-            'sortieForm' => $sortieForm->createView(),
+            'sortieForm' => $sortieForm,
         ]);
     }
 
@@ -197,7 +197,7 @@ class SortiesController extends AbstractController
 
         return $this->render('sorties/annulation.html.twig', [
             'sortie' => $sortie,
-            'annulationForm' => $annulationForm->createView()
+            'annulationForm' => $annulationForm
         ]);
     }
 
