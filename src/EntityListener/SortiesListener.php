@@ -26,6 +26,11 @@ class SortiesListener
             $sortie->setEtat($etatCloture);
         }
 
+//        if(($sortie->getDateLimiteInscription() <= $now || $sortie->getParticipants()->count() < $sortie->getNbInscriptionsMax()) && $sortie->getEtat()->getLibelle() === 'Clôturée'){
+//            $etatCloture = $this->etatRepository->findOneBy(['libelle' => 'Ouverte']);
+//            $sortie->setEtat($etatCloture);
+//        }
+
         if($sortie->getDateHeureDebut() <= $now && $sortie->getEtat()->getLibelle() === 'Ouverte'){
             $etatEnCours = $this->etatRepository->findOneBy(['libelle' => 'Activité en cours']);
             $sortie->setEtat($etatEnCours);
