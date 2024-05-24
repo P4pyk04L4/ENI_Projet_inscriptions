@@ -2,8 +2,7 @@
 
 namespace App\Controller;
 
-use App\Classe\Annulation;
-use App\Classe\Filtre;
+use App\Entity\Filtre;
 use App\Entity\Participant;
 use App\Entity\Sortie;
 use App\Entity\Ville;
@@ -15,13 +14,12 @@ use App\Repository\ParticipantRepository;
 use App\Repository\SortieRepository;
 use App\Service\SortiesChecker;
 use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Util\Json;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Finder\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[Route('/sorties', name: 'sortie_')]
 class SortiesController extends AbstractController
@@ -50,9 +48,9 @@ class SortiesController extends AbstractController
             ]);
         }
 
-        foreach ($sorties as $sortie){
-            $sortie = $sortiesChecker->checkSorties($sortie);
-        }
+//        foreach ($sorties as $sortie){
+//            $sortie = $sortiesChecker->checkSorties($sortie);
+//        }
 
         return $this->render('sorties/index.html.twig', [
             'sorties' => $sorties,
@@ -100,29 +98,17 @@ class SortiesController extends AbstractController
         ]);
     }
 
-    #[Route('/afficherlieux/{id}', name: 'afficher_lieux', defaults: ['id' => null])]
-    public function afficherLieuxParVille(?Ville $ville): JsonResponse
+    #[Route('/afficherlieux/{id}', name: 'afficher_lieux', requirements: ['id' => '\d+'], defaults: ['id' => null])]
+    public function afficherLieuxParVille(Ville $ville): JsonResponse
     {
-        if(!$ville){
-            return $this->json([], RESPONSE::HTTP_BAD_REQUEST);
-        }
-
         $listeLieux = $ville->getLieux();
 
         return $this->json($listeLieux, context: ['groups' => 'listeLieux']);
     }
 
-    #[Route('/gestioninscription/{id}', name: 'inscription_sortie')]
-    public function gestionInscriptionSortie(?Sortie $sortie, EntityManagerInterface $entityManager): Response
+    #[Route('/gestioninscription/{id}', name: 'inscription_sortie', requirements: ['id' => '\d+'])]
+    public function gestionInscriptionSortie(Sortie $sortie, EntityManagerInterface $entityManager): Response
     {
-        if(!$sortie){
-            $this->addFlash(
-                'warning',
-                'Aucune sortie n\'a été trouvée, veuillez contacter l\'administrateur.'
-            );
-            return $this->redirectToRoute('sortie_index');
-        }
-
         /** @var Participant $participant */
         $participant = $this->getUser();
         $now = new \DateTime('now');
@@ -166,39 +152,22 @@ class SortiesController extends AbstractController
         return $this->redirectToRoute('sortie_index');
     }
 
-    #[Route('/detail/{id}', name: 'detail')]
-    public function afficherDetail(?Sortie $sortie): Response
+    #[Route('/detail/{id}', name: 'detail', requirements: ['id' => '\d+'])]
+    public function afficherDetail(Sortie $sortie): Response
     {
-        if (!$sortie){
-            $this->addFlash(
-                'warning',
-                'Aucune sortie n\'a été trouvée, veuillez contacter l\'administrateur.'
-            );
-            return $this->redirectToRoute('sortie_index');
-        }
-
         return $this->render('sorties/detail.html.twig', [
             'sortie' => $sortie
         ]);
     }
 
-    #[Route('/annuler/{id}', name: 'annuler')]
-    public function annulerSortie(?Sortie $sortie, Request $request, EntityManagerInterface $entityManager, EtatRepository $etatRepository){
-        $annulation = new Annulation();
-        $annulationForm = $this->createForm(AnnulationSortieType::class, $annulation);
-        $annulationForm->handleRequest($request);
-        $now = new \DateTime('now');
+    #[Route('/annuler/{id}', name: 'annuler', requirements: ['id' => '\d+'])]
+    public function annulerSortie(Sortie $sortie, Request $request, EntityManagerInterface $entityManager, EtatRepository $etatRepository){
 
-        if($sortie->getOrganisateur() !== $this->getUser()){
-
-            $this->addFlash(
-                'danger',
-                'Vous ne pouvez pas annuler une sortie que vous n\'avez pas créée.'
-            );
-
-            $this->redirectToRoute('sortie_index');
-
+        if($sortie->getOrganisateur() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')){
+            throw new AccessDeniedException('Accès refusé');
         }
+
+        $now = new \DateTime('now');
         if($sortie->getDateHeureDebut() < $now){
             $this->addFlash(
                 'danger',
@@ -208,8 +177,12 @@ class SortiesController extends AbstractController
             $this->redirectToRoute('sortie_index');
         }
 
+        $annulationForm = $this->createForm(AnnulationSortieType::class);
+        $annulationForm->handleRequest($request);
+
+
         if($annulationForm->isSubmitted() && $annulationForm->isValid()){
-            $nouvelleDescription = $sortie->getInfosSortie() . ' /// SORTIE ANNULEE /// Motif : ' . $annulation->getMotifAnnulation();
+            $nouvelleDescription = $sortie->getInfosSortie() . ' /// SORTIE ANNULEE /// Motif : ' . $annulationForm->get('motifAnnulation')->getData();
             $sortie->setInfosSortie($nouvelleDescription);
             $sortie->setEtat($etatRepository->findOneBy(['libelle' => 'Annulée']));
             $entityManager->flush();
@@ -228,20 +201,11 @@ class SortiesController extends AbstractController
         ]);
     }
 
-    #[Route('/modifier/{id}', name: 'modifier')]
-    public function modifierSortie(?Sortie $sortie, Request $request, EntityManagerInterface $entityManager): Response
+    #[Route('/modifier/{id}', name: 'modifier', requirements: ['id' => '\d+'])]
+    public function modifierSortie(Sortie $sortie, Request $request, EntityManagerInterface $entityManager): Response
     {
-        if(!$sortie){
-            $this->addFlash(
-                'danger',
-                'Aucune sortie n\'a été trouvée.'
-            );
-
-            return $this->redirectToRoute('sortie_index');
-        }
-
         if($sortie->getOrganisateur() !== $this->getUser() && !$this->isGranted('ROLE_ADMIN')){
-            throw new AccessDeniedException('Accès refusé');
+            throw new AccessDeniedException();
         }
 
         $sortieForm = $this->createForm(SortieType::class, $sortie);

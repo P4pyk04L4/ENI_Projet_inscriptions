@@ -117,7 +117,7 @@
                 <td>
                     <div style="height: 30px; width: 30px; display: inline-block; vertical-align: middle; margin-right: 10px;">
                         {% if sortie.organisateur.photosProfil is not empty %}
-                            <img src="{{ asset(sortie.organisateur.photosProfil.first.cheminAcces) }}" alt="Photo de profil" style="border-radius: 15px; width: 100%; height: 100%; object-fit: cover;">
+                            <img src="{{ asset(sortie.organisateur.photosProfil.last.cheminAcces) }}" alt="Photo de profil" style="border-radius: 15px; width: 100%; height: 100%; object-fit: cover;">
                         {% else %}
                             <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="grey" class="bi bi-person-circle" viewBox="0 0 16 16">
                                 <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
@@ -129,6 +129,17 @@
                     <a href="{{ path('profils_afficher_participant', {'id' : sortie.organisateur.id }) }}">{{ sortie.organisateur.prenom }} {{ sortie.organisateur.nom|first }}.</a></td>
                 <td>
                     <a href="{{ path('sortie_detail', {'id': sortie.id}) }}"><button class="btn btn-outline-secondary btn-sm">Afficher</button></a>
+
+
+                    {% if (sortie.etat.libelle in ['Créée', 'Ouverte'] and (sortie.organisateur.id is same as app.user.id or is_granted('ROLE_ADMIN'))) %}
+                        <a href="{{ path('sortie_annuler', {'id' : sortie.id }) }}">
+                            <button class="btn btn-sm btn-outline-warning">Annuler</button>
+                        </a>
+                        <a href="{{ path('sortie_modifier', {'id' : sortie.id }) }}">
+                            <button class="btn btn-sm btn-outline-secondary">Modifier</button>
+                        </a>
+                    {% endif %}
+
                     {# BOUTON D'INSCRIPTION ET DE DESINSCRIPTION A UNE SORTIE #}
 
                     <a href="{{ path('sortie_inscription_sortie', {'id' : sortie.id })}}" class="inscription-button">
@@ -143,12 +154,6 @@
                         {%  endif %}
                     </a>
 
-                    {% if sortie.etat.libelle in ['Créée', 'Ouverte'] and sortie.organisateur.id is same as app.user.id %}
-                        <a href="{{ path('sortie_annuler', {'id' : sortie.id }) }}">
-                            <button class="btn btn-sm btn-outline-warning">Annuler</button>
-                        </a>
-                    {% endif %}
-
                 </td>
             </tr>
         {% endfor %}
@@ -162,29 +167,4 @@
     </div>
 
 
-{% endblock %}
-
-{% block scripts %}
-    <script>
-        // let inscriptionButtons = document.querySelectorAll('.inscription-button');
-        // inscriptionButtons.forEach(inscriptionButton => {
-        //     inscriptionButton.addEventListener('click', function(e){
-        //         e.preventDefault();
-        //         let urlInscriptionButton = this.getAttribute('href');
-        //         console.log(urlInscriptionButton);
-        //
-        //         fetch(urlInscriptionButton, {
-        //             method : 'GET',
-        //             headers : {
-        //                 'Content-Type': 'application/json'
-        //             }
-        //         })
-        //             .then(function(response) {
-        //                 const responseData = response;
-        //                 console.log(response.json())
-        //             })
-        //             .catch(error => console.log(error.message))
-        //     })
-        // })
-    </script>
 {% endblock %}

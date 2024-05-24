@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CampusRepository::class)]
 #[UniqueEntity(fields: ['nom'])]
@@ -18,6 +19,7 @@ class Campus
     private ?int $id = null;
 
     #[ORM\Column(length: 80, unique: true)]
+    #[Assert\NotBlank]
     private ?string $nom = null;
 
     /**

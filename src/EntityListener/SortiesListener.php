@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Service;
+namespace App\EntityListener;
 
 use App\Entity\Sortie;
 use App\Repository\EtatRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-class SortiesChecker
+class SortiesListener
 {
     private EtatRepository $etatRepository;
     private EntityManagerInterface $entityManager;
@@ -17,7 +17,7 @@ class SortiesChecker
         $this->entityManager = $entityManager;
     }
 
-    public function checkSorties(Sortie $sortie): Sortie
+    public function postLoad(Sortie $sortie): Sortie
     {
         $now = new \DateTime();
         # Vérifier l'Etat de la sortie

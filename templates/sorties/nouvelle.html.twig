@@ -42,7 +42,6 @@
                     <div class="col">
                         {{ form_widget(sortieForm.dateLimiteInscription) }}
                         {{ form_errors(sortieForm.dateLimiteInscription) }}
-
                     </div>
                 </div>
                 <div class="group row mb-3">
@@ -206,7 +205,7 @@
 
         let jsonArray;
 
-        choixVille.addEventListener('change', function(e){
+        choixVille.addEventListener('change', function(){
             let villeId = this.value;
             let url = this.getAttribute('urllieu') + '/' + villeId;
 
@@ -220,6 +219,7 @@
                     let spinner = document.querySelector('#spinnerLieu');
                     choixLieu.disabled = false;
 
+
                     jsonArray = response;
                     let htmlSelect = '';
 
@@ -229,6 +229,7 @@
 
                     choixLieu.innerHTML = htmlSelect;
                     spinner.remove();
+                    majDonneesLieux();
                     choixLieu.style.display = "block";
 
                 })
@@ -249,7 +250,9 @@
             choixLieu.parentNode.appendChild(spinner);
         }
 
-        choixLieu.addEventListener("change", function(){
+        choixLieu.addEventListener("change", majDonneesLieux)
+
+        function majDonneesLieux(){
             let idSelectionne = parseInt(choixLieu.value);
             let lieuSelectionne;
             for(let i = 0; i <= jsonArray.data.length; i++){
@@ -262,7 +265,7 @@
             lieuCodePostal.innerText = lieuSelectionne.ville.codePostal;
             lieuLongitude.innerText = lieuSelectionne.longitude;
             lieuLatitude.innerText = lieuSelectionne.latitude;
-        })
+        }
     </script>
 {% endblock %}
 

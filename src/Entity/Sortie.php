@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\EntityListener\SortiesListener;
 use App\Repository\SortieRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -10,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SortieRepository::class)]
+#[ORM\EntityListeners([SortiesListener::class])]
 class Sortie
 {
     #[ORM\Id]
@@ -24,6 +26,7 @@ class Sortie
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\NotNull]
+    #[Assert\GreaterThan("today")]
     private ?\DateTimeInterface $dateHeureDebut = null;
 
     #[ORM\Column]
@@ -32,6 +35,7 @@ class Sortie
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotNull]
+    #[Assert\LessThan(propertyPath: "dateHeureDebut", message: "Vous devez sélectionner une date de limite d\'inscription antérieure à la date de sortie")]
     private ?\DateTimeInterface $dateLimiteInscription = null;
 
     #[ORM\Column]
@@ -56,10 +60,12 @@ class Sortie
 
     #[ORM\ManyToOne(inversedBy: 'sorties')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank]
     private ?Campus $siteOrganisateur = null;
 
     #[ORM\ManyToOne(inversedBy: 'sorties')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank]
     private ?Lieu $lieu = null;
 
     #[ORM\ManyToOne(inversedBy: 'sorties')]

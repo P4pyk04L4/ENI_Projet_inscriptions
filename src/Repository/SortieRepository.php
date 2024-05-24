@@ -2,8 +2,7 @@
 
 namespace App\Repository;
 
-use App\Classe\Filtre;
-use App\Entity\Campus;
+use App\Entity\Filtre;
 use App\Entity\Participant;
 use App\Entity\Sortie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
