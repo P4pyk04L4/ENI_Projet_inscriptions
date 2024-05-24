@@ -219,6 +219,7 @@
                     let spinner = document.querySelector('#spinnerLieu');
                     choixLieu.disabled = false;
 
+
                     jsonArray = response;
                     let htmlSelect = '';
 
@@ -228,6 +229,7 @@
 
                     choixLieu.innerHTML = htmlSelect;
                     spinner.remove();
+                    majDonneesLieux();
                     choixLieu.style.display = "block";
 
                 })
@@ -248,7 +250,9 @@
             choixLieu.parentNode.appendChild(spinner);
         }
 
-        choixLieu.addEventListener("change", function(){
+        choixLieu.addEventListener("change", majDonneesLieux)
+
+        function majDonneesLieux(){
             let idSelectionne = parseInt(choixLieu.value);
             let lieuSelectionne;
             for(let i = 0; i <= jsonArray.data.length; i++){
@@ -261,7 +265,7 @@
             lieuCodePostal.innerText = lieuSelectionne.ville.codePostal;
             lieuLongitude.innerText = lieuSelectionne.longitude;
             lieuLatitude.innerText = lieuSelectionne.latitude;
-        })
+        }
     </script>
 {% endblock %}
 
